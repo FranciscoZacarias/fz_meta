@@ -1,0 +1,126 @@
+
+/*
+
+Generates an enum and a respective static Str8 array
+- Assigns will be inserted in the table as well
+- Table types (case sensitive):
+  - enum
+  - string8
+  - cstring
+
+*/
+
+@table(enum, string8)
+Token_Type {
+  Token_Unknown = 0
+
+  // Literals
+  Token_Identifier
+  Token_Int_Literal
+  Token_Float_Literal
+  Token_Hex_Literal
+  Token_String_Literal
+  Token_Char_Literal
+
+  // Keywords
+  Token_Keyword_Return
+  Token_Keyword_If
+  Token_Keyword_Else
+  Token_Keyword_While
+  Token_Keyword_For
+  Token_Keyword_Break
+  Token_Keyword_Continue
+  Token_Keyword_Struct
+  Token_Keyword_Union
+  Token_Keyword_Enum
+  Token_Keyword_Typedef
+  Token_Keyword_Static
+  Token_Keyword_Void
+  Token_Keyword_Int
+  Token_Keyword_Char
+  Token_Keyword_Float
+  Token_Keyword_Double
+  Token_Keyword_Unsigned
+  Token_Keyword_Signed
+  Token_Keyword_Const
+  Token_Keyword_Extern
+  Token_Keyword_Switch
+  Token_Keyword_Case
+  Token_Keyword_Default
+  Token_Keyword_Sizeof
+  Token_Keyword_Inline
+  Token_Keyword_Do
+  Token_Keyword_Goto
+  Token_Keyword_Restrict
+  Token_Keyword_Volatile
+  Token_Keyword_Register
+
+  // Preprocessor
+  Token_Preprocessor_Hash // #
+
+  // Operators
+  Token_Plus            // +
+  Token_Plus_Assign     // +=
+  Token_Increment       // ++
+  Token_Minus           // -
+  Token_Minus_Assign    // -=
+  Token_Decrement       // --
+  Token_Arrow           // ->
+  Token_Multiply        // *
+  Token_Multiply_Assign // *=
+  Token_Divide          // /
+  Token_Divide_Assign   // /=
+  Token_Modulo          // %
+  Token_Modulo_Assign   // %=
+
+  Token_Assign             // =
+  Token_Equal              // ==
+  Token_Not                // !
+  Token_Not_Equal          // !=
+  Token_Less               // <
+  Token_Less_Equal         // <=
+  Token_Left_Shift         // <<
+  Token_Left_Shift_Assign  // <<=
+  Token_Greater            // >
+  Token_Greater_Equal      // >=
+  Token_Right_Shift        // >>
+  Token_Right_Shift_Assign // >>=
+
+  Token_Bit_And         // &
+  Token_Bit_And_Assign  // &=
+  Token_Logical_And     // &&
+  Token_Bit_Or          // |
+  Token_Bit_Or_Assign   // |=
+  Token_Logical_Or      // ||
+
+  Token_Bit_Xor         // ^
+  Token_Bit_Xor_Assign  // ^=
+  Token_Bit_Not         // ~
+
+  // Delimiters
+  Token_Semicolon        // ;
+  Token_Comma            //   
+  Token_Dot              // .
+  Token_Colon            // :
+  Token_Question         // ?
+
+  Token_Open_Parenthesis  // (
+  Token_Close_Parenthesis // )
+  Token_Open_Brace        // {
+  Token_Close_Brace       // }
+  Token_Open_Bracket      // [
+  Token_Close_Bracket     // ]
+
+  // Special
+  Token_Space                 // ' '
+  Token_Tab                   // /t
+  Token_New_Line              // \n \r \r\n
+  Token_Comment_Line          // //
+  Token_Comment_Block_Start   // /*
+  Token_Comment_Block_End     // */
+
+  Token_End_Of_File
+
+  Token_Count // Keep at the end of the enum
+}
+

@@ -1,0 +1,4 @@
+build/*
+.git/*
+*.rdbg
+*.10x
