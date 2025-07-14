@@ -1,3 +1,6 @@
+#ifndef LEXER_H
+#define LEXER_H
+
 global const char* token_type_names[] = {
   "Token_Unknown",
 
@@ -104,3 +107,5 @@ internal b32   at_eof(Lexer* lexer);
 internal u32   character_offset(Lexer* lexer, char8* character);
 
 internal void print_current_token(Lexer* lexer);
+
+#endif // LEXER_H

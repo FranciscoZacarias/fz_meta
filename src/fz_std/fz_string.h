@@ -21,7 +21,7 @@ typedef struct String8_List {
 } String8_List;
 
 internal String8 string8_new(u64 size, char8* str);
-internal String8 string8_format(String8 fmt, ...);
+internal String8 string8_format(Arena* arena, String8 fmt, ...);
 internal String8 string8_range(char8* first, char8* range);
 internal String8 string8_concat(Arena* arena, String8 a, String8 b); // TODO(fz): Test this func
 internal String8 string8_slice(String8 str, u64 start, u64 end);

@@ -51,13 +51,13 @@ internal void* arena_push_no_zero(Arena* arena, u64 size) {
       u64 commit_aligned = AlignPow2(new_position, arena->commit_size);
       u64 commit_clamped = ClampTop(commit_aligned, arena->reserved);
       u64 commit_size    = commit_clamped - arena->commited;
-      if (memory_commit((u8*)arena + arena->commited, commit_size)) {
+      if (memory_commit((char8*)arena + arena->commited, commit_size)) {
         arena->commited = commit_clamped;
       } else {
         ERROR_MESSAGE_AND_EXIT("Could not commit memory when increasing the arena's committed memory.");
       }
     }
-    result = (u8*)arena + position_memory;
+    result = (char8*)arena + position_memory;
     arena->position = new_position;
   } else {
     ERROR_MESSAGE_AND_EXIT("Trying to allocate too much memory to a non dynamic arena.\nSize: %llu\nArena->Position: %llu\nArena->reserved: %llu\nArena->Position+Size: %llu", size, arena->position, arena->reserved, arena->position+size);
@@ -90,7 +90,7 @@ internal void  arena_clear(Arena* arena) {
 }
 
 internal void  arena_free(Arena* arena) {
-  memory_release((u8*)arena, arena->reserved);
+  memory_release((char8*)arena, arena->reserved);
 }
 
 internal void print_arena(Arena *arena, const char8* label) {

@@ -3,9 +3,26 @@ internal String8 string8_new(u64 size, char8* str) {
   return result;
 }
 
-internal String8 string8_format(String8 fmt, ...) {
-  // TODO(fz): Implement
-  return fmt;
+internal String8 string8_format(Arena* arena, String8 fmt, ...) {
+  char8* c_fmt = cstring_from_string8(arena, fmt);
+
+  va_list args;
+  va_start(args, fmt);
+
+  s32 required = vsnprintf(0, 0, c_fmt, args);
+  va_end(args);
+
+  if (required <= 0) {
+    return (String8){0};
+  }
+
+  char8* buffer = ArenaPush(arena, char8, required + 1);
+
+  va_start(args, fmt);
+  vsnprintf(buffer, required + 1, c_fmt, args);
+  va_end(args);
+
+  return string8_new((u64)required, buffer);
 }
 
 internal String8 string8_range(char8* first, char8* range) {
@@ -19,6 +36,7 @@ internal String8 string8_concat(Arena* arena, String8 a, String8 b) {
   result.str = ArenaPush(arena, char8, result.size);
   MemoryCopy(result.str, a.str, a.size);
   MemoryCopy(result.str + a.size, b.str, b.size);
+  return result;
 }
 
 internal b32 string8_equal(String8 a, String8 b) {

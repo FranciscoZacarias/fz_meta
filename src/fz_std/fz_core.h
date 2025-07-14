@@ -244,7 +244,7 @@
 # define AssertNoReentry()
 #endif
 
-#define StaticAssert(condition,label) typedef u8 Glue(label,__LINE__) [(condition)?1:-1]
+#define StaticAssert(condition,label) typedef char8 Glue(label,__LINE__) [(condition)?1:-1]
 
 #define ArrayCount(a) (sizeof(a)/sizeof((a)[0]))
 
@@ -254,8 +254,8 @@
 #define ClampBot(X,B) Max(X,B)
 #define Clamp(val,min,max) (((val)<(min))?(min):((val)>(max))?(max):(val))
 
-#define IntFromPtr(p) (u64)((u8*)p - (u8*)0)
-#define PtrFromInt(i) (void*)((u8*)0 + (i))
+#define IntFromPtr(p) (u64)((char8*)p - (char8*)0)
+#define PtrFromInt(i) (void*)((char8*)0 + (i))
 #define Member(T,m) (((T*)0)->m)
 #define OffsetOfMember(T,m) IntFromPtr(&Member(T,m))
 
@@ -322,7 +322,7 @@ typedef unsigned int char32;
 #define CHAR32_MIN 0x00000000
 #define CHAR32_MAX 0xFFFFFFFF
 
-typedef unsigned char      u8;
+typedef unsigned char      char8;
 typedef unsigned short     u16;
 typedef unsigned int       u32;
 typedef unsigned long long u64;
