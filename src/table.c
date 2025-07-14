@@ -102,7 +102,7 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
       cstring_name[i] = char8_to_lower(cstring_name[i]);
     }
 
-    String8 start = string8_format(scratch.arena, Str8("\nstatic const char* %s_string8[] {\n"), cstring_name);
+    String8 start = string8_format(scratch.arena, Str8("\nstatic const char* %s_cstring[] {\n"), cstring_name);
     String8 end   = string8_format(scratch.arena, Str8("\n};\n"));
 
     String8 content;
