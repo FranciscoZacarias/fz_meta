@@ -1,1 +1,1 @@
-build\fz_meta.exe
+build\fz_meta.exe %*

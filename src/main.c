@@ -5,7 +5,7 @@
 #define META_FILE Str8("D:\\work\\fz_meta\\token_table.fz_meta")
 #define OUTPUT_DIR Str8("D:\\work\\fz_meta\\generated\\")
 
-void entry_point() {
+void entry_point(Command_Line command_line) {
   Arena_Temp scratch = scratch_begin(0,0);
   win32_enable_console(true);
 
