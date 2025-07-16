@@ -52,9 +52,11 @@ internal void advance_token(Lexer* lexer) {
     advance_character(lexer);
   }
 
+#if PRINT_TOKENS
   if (lexer->current_token.type != Token_Unknown) {
     print_current_token(lexer);
   }
+#endif
 }
 
 internal void advance_character(Lexer* lexer) {

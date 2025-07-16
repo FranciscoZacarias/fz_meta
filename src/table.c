@@ -151,6 +151,7 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
   }
 
   // print table
+#if PRINT_TABLE
   printf("Table: ");
   string8_printf(table.table_name); 
   printf("\n");
@@ -159,4 +160,5 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
     string8_printf(table.values[i]);
     printf("\n");
   }
+#endif
 }
