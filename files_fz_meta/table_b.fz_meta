@@ -1,0 +1,20 @@
+
+/*
+
+Generates an enum and a respective static Str8 array
+- Assigns will be inserted in the table as well
+- Table types (case sensitive):
+  - enum
+  - string8
+  - cstring
+
+*/
+
+@table(enum, string8, cstring)
+Token_Type {
+  Table_B_A
+  Table_B_B
+  Table_B_C
+  Table_B_D
+}
+

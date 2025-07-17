@@ -96,13 +96,13 @@ internal b32 file_has_extension(String8 filename, String8 ext) {
   return true;
 }
 
-internal File_List file_get_all_files_in_path_recursively(Arena* arena, String8 path, u32 flags) {
-  File_List result = {0};
+internal String8_List file_get_all_file_paths_recursively(Arena* arena, String8 path) {
+  String8_List result = {0};
   Arena_Temp scratch = scratch_begin(0, 0);
 
   if (!path_is_directory(path)) {
-    arena_temp_end(&scratch);
     printf("Path '%s' is not a directory.\n", path.str);
+    scratch_end(&scratch);
     return result;
   }
 
@@ -110,13 +110,17 @@ internal File_List file_get_all_files_in_path_recursively(Arena* arena, String8 
   string8_list_push(scratch.arena, &dir_queue, path);
 
   while (dir_queue.node_count > 0) {
-    String8 current_dir    = string8_list_pop(&dir_queue);
+    String8 current_dir = string8_list_pop(&dir_queue);
     String16 current_dir16 = string16_from_string8(scratch.arena, current_dir);
     if (current_dir16.size == 0) continue;
 
-    String16 search_path = {current_dir16.size + 2, ArenaPushNoZero(scratch.arena, wchar_t, current_dir16.size + 3)};
+    // search_path = current_dir16 + L"\*"
+    String16 search_path = {
+      current_dir16.size + 2,
+      ArenaPushNoZero(scratch.arena, wchar_t, current_dir16.size + 3)
+    };
     memcpy(search_path.str, current_dir16.str, current_dir16.size * sizeof(wchar_t));
-    search_path.str[current_dir16.size] = L'\\';
+    search_path.str[current_dir16.size]     = L'\\';
     search_path.str[current_dir16.size + 1] = L'*';
     search_path.str[current_dir16.size + 2] = L'\0';
 
@@ -136,44 +140,20 @@ internal File_List file_get_all_files_in_path_recursively(Arena* arena, String8 
       if (filename8.size == 0) continue;
 
       u64 full_path_size = current_dir.size + 1 + filename8.size;
-      char8* full_path_str = ArenaPushNoZero(arena, char8, full_path_size + 1);
-      String8 full_path = {full_path_size, full_path_str};
-
+      char8* full_path_str = ArenaPushNoZero(scratch.arena, char8, full_path_size + 1);
       memcpy(full_path_str, current_dir.str, current_dir.size);
       full_path_str[current_dir.size] = '\\';
       memcpy(full_path_str + current_dir.size + 1, filename8.str, filename8.size);
       full_path_str[full_path_size] = '\0';
-      
-      // TODO(fz): This is just getting impl files. This should be an argument
+
+      String8 full_path = {full_path_size, full_path_str};
       b32 is_directory = HasFlags(find_data.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY);
-      b32 is_c_file    = !is_directory && file_has_extension(filename8, Str8("c"));
-      b32 is_h_file    = !is_directory && file_has_extension(filename8, Str8("h"));
-      b32 is_dot_file  = !is_directory && filename8.size > 0 && (filename8.str[0] == '.');
-      b32 is_dot_dir   =  is_directory && filename8.size > 0 && (filename8.str[0] == '.');
 
-      b32 add_path = true;
-      if (HasFlags(flags, FileFlag_WhiteList)) {
-        add_path = (is_c_file    && HasFlags(flags, FileFlag_CFiles))   ||
-                   (is_h_file    && HasFlags(flags, FileFlag_HFiles))   ||
-                   (is_directory && HasFlags(flags, FileFlag_Dirs))     ||
-                   (is_dot_file  && HasFlags(flags, FileFlag_DotFiles)) ||
-                   (is_dot_dir   && HasFlags(flags, FileFlag_DotDirs)); 
+      if (is_directory) {
+        string8_list_push(scratch.arena, &dir_queue, full_path);
       } else {
-        add_path = !((is_c_file   && HasFlags(flags, FileFlag_CFiles))   ||
-                    (is_h_file    && HasFlags(flags, FileFlag_HFiles))   ||
-                    (is_directory && HasFlags(flags, FileFlag_Dirs))     ||
-                    (is_dot_file  && HasFlags(flags, FileFlag_DotFiles)) ||
-                    (is_dot_dir   && HasFlags(flags, FileFlag_DotDirs)));
-      }
-
-      if (add_path) {
-        String8 path = string8_new(full_path_size, full_path_str);
-        if (is_directory) {
-          string8_list_push(scratch.arena, &dir_queue, path);
-        } else {
-          File_Data file = file_load(arena, path);
-          file_list_push(arena, &result, file);
-        }
+        String8 normalized_path = path_new(arena, full_path);
+        string8_list_push(arena, &result, normalized_path);
       }
 
     } while (FindNextFileW(find_handle, &find_data));

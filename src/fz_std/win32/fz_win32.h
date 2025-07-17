@@ -66,16 +66,16 @@ typedef struct File_List {
 
 internal void      file_list_push(Arena* arena, File_List* list, File_Data file);
 
-internal b32       file_create(String8 file_path); /* Creates file. If file exists, returns true anyway. */
-internal b32       file_exists(String8 file_path); /* Returns true if file exists */
-internal u32       file_overwrite(String8 file_path, char8* data, u64 data_size);
-internal u32       file_append(String8 file_path, char8* data, u64 data_size);
-internal b32       file_wipe(String8 file_path);
-internal u32       file_size(String8 file_path);
-internal File_Data file_load(Arena* arena, String8 file_path);
-internal b32       file_has_extension(String8 filename, String8 ext);
-internal u64       file_get_last_modified_time(String8 file_path);
-internal File_List file_get_all_files_in_path_recursively(Arena* arena, String8 path, u32 flags);
+internal b32          file_create(String8 file_path); /* Creates file. If file exists, returns true anyway. */
+internal b32          file_exists(String8 file_path); /* Returns true if file exists */
+internal u32          file_overwrite(String8 file_path, char8* data, u64 data_size);
+internal u32          file_append(String8 file_path, char8* data, u64 data_size);
+internal b32          file_wipe(String8 file_path);
+internal u32          file_size(String8 file_path);
+internal File_Data    file_load(Arena* arena, String8 file_path);
+internal b32          file_has_extension(String8 filename, String8 ext);
+internal u64          file_get_last_modified_time(String8 file_path);
+internal String8_List file_get_all_file_paths_recursively(Arena* arena, String8 path);
 
 internal String8 path_new(Arena* arena, String8 path);
 internal b32     path_create_as_directory(String8 path);
