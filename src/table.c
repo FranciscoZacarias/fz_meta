@@ -1,4 +1,5 @@
 internal void generate_table(Lexer* lexer, String8 output_file) {
+  Arena_Temp scratch = scratch_begin(0,0);
   Table_Gen table;
   MemoryZeroStruct(&table);
   table.arena = arena_init();
@@ -66,10 +67,16 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
     }
   }
 
+  // Prepare file name and wipe the current file
+  if (!file_has_extension(output_file, Str8("gen.c"))) {
+    output_file = string8_concat(scratch.arena, output_file, Str8(".gen.c"));
+  }
+  if (file_exists(output_file)) {
+    file_wipe(output_file);
+  }
   
   // write generated c code
   if (HasFlags(table.tables_flags, Table_Flag_Enum)) {
-    Arena_Temp scratch = scratch_begin(0,0);
     String8 generated = Str8("");
     MemoryZeroStruct(&generated);
 
@@ -80,7 +87,12 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
     content.size = 0;
     content.str  = ArenaPush(scratch.arena, char8, Kilobytes(32));
     for (u32 i = 0; i < table.values_count; i += 1) {
-      String8 value = (i == table.values_count-1) ? Str8("  %s,") : Str8("  %s,\n");
+      String8 value = Str8("  %s,\n");
+      if (i == 0) {
+        value = Str8("  %s = 0,\n");
+      } else if (i == table.values_count-1) {
+        value = Str8("  %s,");
+      }
       String8 entry = string8_format(scratch.arena, value, cstring_from_string8(scratch.arena, table.values[i]));
       MemoryCopy(content.str + content.size, entry.str, entry.size);
       content.size += entry.size;
@@ -88,8 +100,7 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
     String8 start_and_content = string8_concat(scratch.arena, start, content);
     String8 full_table = string8_concat(scratch.arena, start_and_content, end);
 
-    file_append(scratch.arena, output_file, full_table.str, full_table.size);
-    scratch_end(&scratch);
+    file_append(output_file, full_table.str, full_table.size);
   }
 
   if (HasFlags(table.tables_flags, Table_Flag_Cstring)) {
@@ -117,12 +128,10 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
     String8 start_and_content = string8_concat(scratch.arena, start, content);
     String8 full_table = string8_concat(scratch.arena, start_and_content, end);
 
-    file_append(scratch.arena, output_file, full_table.str, full_table.size);
-    scratch_end(&scratch);
+    file_append(output_file, full_table.str, full_table.size);
   }
 
   if (HasFlags(table.tables_flags, Table_Flag_String8)) {
-    Arena_Temp scratch = scratch_begin(0,0);
     String8 generated = Str8("");
     MemoryZeroStruct(&generated);
 
@@ -145,9 +154,7 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
     }
     String8 start_and_content = string8_concat(scratch.arena, start, content);
     String8 full_table = string8_concat(scratch.arena, start_and_content, end);
-
-    file_append(scratch.arena, output_file, full_table.str, full_table.size);
-    scratch_end(&scratch);
+    file_append(output_file, full_table.str, full_table.size);
   }
 
   // print table
@@ -161,4 +168,6 @@ internal void generate_table(Lexer* lexer, String8 output_file) {
     printf("\n");
   }
 #endif
+
+  scratch_end(&scratch);
 }

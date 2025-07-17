@@ -29,32 +29,40 @@ internal u64 memory_get_page_size() {
 
 //~ File handling
 internal HANDLE _win32_get_file_handle_read(String8 file_path) {
-  HANDLE file_handle = CreateFileA(file_path.str, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  Arena_Temp scratch = scratch_begin(0,0);
+  char8* cstring = cstring_from_string8(scratch.arena, file_path);
+  HANDLE file_handle = CreateFileA(cstring, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (file_handle == INVALID_HANDLE_VALUE) {
     DWORD error = GetLastError();
     printf("Error: Failed to open file %s. Error: %lu\n", file_path.str, error);
     return NULL;
   }
+  scratch_end(&scratch);
   return file_handle;
 }
 
 internal HANDLE _win32_get_file_handle_write(String8 file_path) {
-  HANDLE file_handle = CreateFileA(file_path.str, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  Arena_Temp scratch = scratch_begin(0,0);
+  char8* cstring = cstring_from_string8(scratch.arena, file_path);
+  HANDLE file_handle = CreateFileA(cstring, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (file_handle == INVALID_HANDLE_VALUE) {
     DWORD error = GetLastError();
     printf("Error: Failed to open file %s. Error: %lu\n", file_path.str, error);
     return NULL;
   }
+  scratch_end(&scratch);
   return file_handle;
 }
 
 internal b32 file_create(String8 file_path) {
+  Arena_Temp scratch = scratch_begin(0, 0);
   b32 result = 0;
   if (file_exists(file_path)) {
     return result;
   }
 
-  HANDLE file = CreateFileA(file_path.str, GENERIC_READ, 0, 0, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
+  char8* cstring = cstring_from_string8(scratch.arena, file_path);
+  HANDLE file = CreateFileA(cstring, GENERIC_READ, 0, 0, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
   DWORD error = GetLastError();  
   if (error == ERROR_SUCCESS || error == ERROR_FILE_EXISTS) {
     result = 1;
@@ -63,6 +71,7 @@ internal b32 file_create(String8 file_path) {
     printf("Error creating file %s with error: %lu\n", file_path.str, error);
   }
   CloseHandle(file);
+  scratch_end(&scratch);
   return result;
 }
 
@@ -176,6 +185,51 @@ internal File_List file_get_all_files_in_path_recursively(Arena* arena, String8 
   return result;
 }
 
+internal String8 path_new(Arena* arena, String8 input) {
+  char8* data = ArenaPush(arena, char8, input.size);
+  for (u64 i = 0; i < input.size; i++) {
+    char8 c = input.str[i];
+    data[i] = (c == '/' || c == '\\') ? '\\' : c;
+  }
+  return (String8){ .size = input.size, .str = data };
+}
+
+internal b32 path_create_as_directory(String8 path) {
+  b32 result = false;
+  char8 buffer[MAX_PATH];
+  u64 len = (path.size < MAX_PATH - 1) ? path.size : (MAX_PATH - 1);
+  MemoryCopy(buffer, path.str, len);
+  buffer[len] = 0;
+
+  // Try to create the directory
+  if (CreateDirectoryA(buffer, 0)) {
+    result = true;
+  } else {
+    // If it already exists, consider it success
+    DWORD err = GetLastError();
+    if (err == ERROR_ALREADY_EXISTS || err == ERROR_ACCESS_DENIED) {
+      result = true;
+    }
+  }
+
+  return result;
+}
+
+internal b32 path_is_file(String8 path) {
+  b32 result = false;
+  char8 buffer[MAX_PATH];
+  u64 len = (path.size < MAX_PATH - 1) ? path.size : (MAX_PATH - 1);
+  MemoryCopy(buffer, path.str, len);
+  buffer[len] = 0;
+
+  DWORD attrs = GetFileAttributesA(buffer);
+  if (attrs == INVALID_FILE_ATTRIBUTES) {
+    return result;
+  }
+  result = (attrs & FILE_ATTRIBUTE_DIRECTORY) == 0;
+  return result;
+}
+
 internal b32 path_is_directory(String8 path) {
   b32 result = false;
 
@@ -202,13 +256,97 @@ internal b32 path_is_directory(String8 path) {
   return result;;
 }
 
-internal String8 get_present_working_directory(void) {
+internal String8 path_get_working_directory(void) {
   static char8 buffer[MAX_PATH];
   DWORD len = GetCurrentDirectoryA(MAX_PATH, buffer);
   if (len == 0 || len >= MAX_PATH) {
     return (String8){0};
   }
   return (String8){ .size = len, .str = buffer };
+}
+
+internal String8 path_get_file_name(String8 path) {
+  u64 last_sep = 0;
+  for (u64 i = 0; i < path.size; i++) {
+    if (path.str[i] == '\\' || path.str[i] == '/') {
+      last_sep = i + 1;
+    }
+  }
+  return (String8){
+    .str = path.str + last_sep,
+    .size = path.size - last_sep
+  };
+}
+
+internal String8 path_get_file_name_no_ext(String8 path) {
+  String8 file = path_get_file_name(path);
+
+  u64 dot = file.size;
+  for (u64 i = 0; i < file.size; i++) {
+    if (file.str[i] == '.') {
+      dot = i;
+      break;
+    }
+  }
+
+  return (String8){
+    .str = file.str,
+    .size = dot
+  };
+}
+
+internal String8 path_join(Arena* arena, String8 a, String8 b) {
+  b32 a_ends_with_sep   = (a.size > 0 && (a.str[a.size - 1] == '/' || a.str[a.size - 1] == '\\'));
+  b32 b_starts_with_sep = (b.size > 0 && (b.str[0] == '/' || b.str[0] == '\\'));
+
+  u64 total_size = a.size + b.size + 1; // +1 in case we need to insert a separator
+  if (a_ends_with_sep && b_starts_with_sep) {
+    total_size -= 1; // we’ll skip one of the slashes
+  }
+
+  char8* data = ArenaPush(arena, char8, total_size);
+  u64 pos = 0;
+
+  // Copy 'a'
+  MemoryCopy(data + pos, a.str, a.size);
+  pos += a.size;
+
+  // Handle slash insertion/removal
+  if (!a_ends_with_sep && !b_starts_with_sep && a.size > 0 && b.size > 0) {
+    data[pos++] = '\\';
+  } else if (a_ends_with_sep && b_starts_with_sep) {
+    b.str += 1;
+    b.size -= 1;
+  }
+
+  // Copy 'b'
+  MemoryCopy(data + pos, b.str, b.size);
+  pos += b.size;
+
+  return (String8){ .size = pos, .str = data };
+}
+
+internal String8 path_get_current_directory_name(String8 path) {
+  String8 result = {0};
+  u64 index = 0;
+  if (string8_find_last(path, Str8("\\"), &index)) {
+    result = string8_slice(path, index+1, path.size);
+  }
+  return result;
+}
+
+internal String8 path_dirname(String8 path) {
+  u64 last_sep = 0;
+  for (u64 i = 0; i < path.size; i++) {
+    if (path.str[i] == '/' || path.str[i] == '\\') {
+      last_sep = i;
+    }
+  }
+
+  return (String8){
+    .size = last_sep,
+    .str  = path.str,
+  };
 }
 
 internal b32 file_exists(String8 file_path) {
@@ -229,44 +367,62 @@ internal b32 file_exists(String8 file_path) {
 
 
 internal u32 file_overwrite(String8 file_path, char8* data, u64 data_size) {
-  s32 bytes_written = 0;
-  if (!file_exists(file_path)) {
-    file_create(file_path);
-  } else {
-    file_wipe(file_path);
-  }
-  
-  HANDLE file_handle = _win32_get_file_handle_write(file_path);
+  Arena_Temp scratch = scratch_begin(0, 0);
+  char8* cpath = cstring_from_string8(scratch.arena, file_path);
+
+  // Create or overwrite the file in one shot
+  HANDLE file_handle = CreateFileA(cpath, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+
   if (file_handle == INVALID_HANDLE_VALUE) {
+    DWORD error = GetLastError();
+    printf("CreateFileA failed: error code %lu for file %s\n", error, cpath);
+    scratch_end(&scratch);
     return 0;
   }
-  
-  if (!WriteFile(file_handle, data, data_size, &bytes_written, NULL)) {
+
+  DWORD bytes_written = 0;
+  BOOL write_result = WriteFile(file_handle, data, (DWORD)data_size, &bytes_written, NULL);
+  if (!write_result) {
+    DWORD error = GetLastError();
+    printf("WriteFile failed: error code %lu\n", error);
     CloseHandle(file_handle);
+    scratch_end(&scratch);
     return 0;
   }
-  
+
   CloseHandle(file_handle);
+  scratch_end(&scratch);
   return bytes_written;
 }
 
-internal u32 file_append(Arena* arena, String8 file_path, char8* data, u64 data_size) {
-  if (!file_exists(file_path)) {
-    return file_overwrite(file_path, data, data_size);
-  }
-  
-  File_Data existing = file_load(arena, file_path);
-  if (existing.data.str == NULL) {
+internal u32 file_append(String8 file_path, char8* data, u64 data_size) {
+  Arena_Temp scratch = scratch_begin(0, 0);
+  char8* cpath = cstring_from_string8(scratch.arena, file_path);
+  HANDLE file_handle = CreateFileA(cpath, FILE_APPEND_DATA | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+  if (file_handle == INVALID_HANDLE_VALUE) {
+    DWORD error = GetLastError();
+    printf("CreateFileA failed in file_append: error code %lu for file %s\n", error, cpath);
+    scratch_end(&scratch);
     return 0;
   }
-  
-  u64 new_size = existing.data.size + data_size;
-  char8* combined_data = ArenaPush(arena, char8, new_size);
-  
-  MemoryCopy(combined_data, existing.data.str, existing.data.size);
-  MemoryCopy(combined_data + existing.data.size, data, data_size);
-  
-  return file_overwrite(file_path, combined_data, new_size);
+
+  // Move file pointer to the end manually (some versions of FILE_APPEND_DATA don't imply this)
+  SetFilePointer(file_handle, 0, NULL, FILE_END);
+
+  DWORD bytes_written = 0;
+  BOOL result = WriteFile(file_handle, data, (DWORD)data_size, &bytes_written, NULL);
+  if (!result) {
+    DWORD error = GetLastError();
+    printf("WriteFile failed in file_append: error code %lu\n", error);
+    CloseHandle(file_handle);
+    scratch_end(&scratch);
+    return 0;
+  }
+
+  CloseHandle(file_handle);
+  scratch_end(&scratch);
+  return bytes_written;
 }
 
 internal b32 file_wipe(String8 file_path) {
@@ -366,7 +522,7 @@ internal void _error_message_and_exit(const char8 *file, int line, const char8 *
   
   if (ErrorLogFile.size > 0) {
     Arena_Temp scratch = scratch_begin(0,0);
-    file_append(scratch.arena, ErrorLogFile, detailed_buffer, len);
+    file_append(ErrorLogFile, detailed_buffer, len);
     scratch_end(&scratch);
   }
 

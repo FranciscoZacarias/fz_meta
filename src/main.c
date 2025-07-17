@@ -4,15 +4,13 @@
 #define PRINT_TABLE  0
 #include "main.h"
 
-#define META_FILE Str8("D:\\work\\fz_meta\\token_table.fz_meta")
-#define OUTPUT_DIR Str8("D:\\work\\fz_meta\\generated\\")
+global String8 input_file = {0};
+global String8 input      = {0};
+global String8 output     = {0};
 
 void entry_point(Command_Line command_line) {
   Arena_Temp scratch = scratch_begin(0,0);
   win32_enable_console(true);
-
-  string8_printf(get_present_working_directory());
-  printf("\n");
 
   if (command_line.args_count == 0) {
     printf("\nUsage:\n");
@@ -21,69 +19,72 @@ void entry_point(Command_Line command_line) {
     printf("  --input      \"path/to/input/directory\"\n");
     printf("    : Accepts a directory of .fz_meta files\n\n");
     printf("  --output     \"path/to/output/\"\n");
+    printf("    : [OPTIONAL]\n");
     printf("    : Accepts a directory to place generated c files\n\n");
     return;  
   }
 
+  String8 pwd = path_get_working_directory();
+  String8 dir = path_get_current_directory_name(pwd);
+  if (string8_equal(dir, Str8("build"))) {
+    pwd = path_dirname(pwd); // move back if in build
+  }
+
   for (u32 i = 0; i < command_line.args_count; i += 1) {
     Command_Line_Arg arg = command_line.args[i];
-    if (arg.is_flag) {
-    
-    } else {
-      if (string8_equal(arg.key, Str8("input_file"))) {
-        // Handles single input file
-        if (file_exists(arg.value)) {
-          if (!file_has_extension(arg.value, Str8("fz_meta"))) {
-            printf("File passed in input_file is not a .fz_meta file");
-            return;
-          } else {
-            string8_printf(arg.value);
-            printf("\n");
-          }
-        } else {
-          printf("input file doesn't exist\n");
-          return;
-        }
-      } else if (string8_equal(arg.key, Str8("input"))) {
-        // Handles all input files in a given dir
-        if (path_is_directory(arg.value)) {
-          string8_printf(arg.value);
-          printf("\n");
-        } else {
-          printf("input_dir is not a directory\n");
-          return;
-        }
-      } else if (string8_equal(arg.key, Str8("output"))) {
-        // Output to generated files
-        if (path_is_directory(arg.value)) {
-          string8_printf(arg.value);
-          printf("\n");
-        } else {
+    if (arg.is_flag) continue;
+
+    String8 path = path_new(scratch.arena, arg.value);
+    String8 full_path = path_join(scratch.arena, pwd, path);
+
+    if (string8_equal(arg.key, Str8("input_file"))) {
+      if (!file_exists(full_path)) {
+        printf("input file doesn't exist\n");
+        return;
+      }
+      if (!file_has_extension(path, Str8("fz_meta"))) {
+        printf("File passed in input_file is not a .fz_meta file");
+        return;
+      }
+      input_file = full_path;
+    } else if (string8_equal(arg.key, Str8("input"))) {
+      if (!path_is_directory(full_path)) {
+        printf("input_dir is not a directory\n");
+        return;
+      }
+      input = full_path;
+    } else if (string8_equal(arg.key, Str8("output"))) {
+      if (!path_is_directory(full_path)) {
+        if (!path_create_as_directory(full_path)) {
           printf("output is not a directory\n");
           return;
         }
+        string8_printf(full_path);
+        printf("\n");
       }
+      output = full_path;
     }
   }
 
-  String8 input_file  = META_FILE;
-  String8 output_dir  = OUTPUT_DIR;
-  String8 output_file = Str8("generated");
-
-  u64 last_separator_index = 0;
-  u64 dot_index = input_file.size;
-  string8_find_last(input_file, Str8("\\"), &last_separator_index);
-  string8_find_last(input_file, Str8("."),  &dot_index);
-  output_file = string8_slice(input_file, last_separator_index+1, dot_index);
-
-  String8 full_name = string8_concat(scratch.arena, output_file, Str8(".gen.c"));
-  String8 file_path = string8_concat(scratch.arena, output_dir, full_name);
-  file_wipe(file_path);
-  file_create(file_path);
+  if (input_file.size == 0 && input.size == 0) {
+    printf("No input directory nor input file provided\n\n");
+    return;
+  }
+  if (output.size == 0 || path_is_directory(output)) {
+    String8 default_generated_path = path_join(scratch.arena, pwd, Str8("src\\generated"));
+    if (!path_create_as_directory(default_generated_path)) {
+      printf("Unable to find or create the default generated path\n");
+      string8_printf(default_generated_path);
+      printf("\n");
+      return;
+    }
+    output = default_generated_path;
+  }
 
   Lexer lexer;
-  lexer_init(&lexer, META_FILE);
+  lexer_init(&lexer, input_file);
 
+  // TODO(fz): We're assuming just 1 file given by input_file and not a directory given by input
   while (!at_eof(&lexer)) {
     advance_token(&lexer);
     Token token = current_token(&lexer);
@@ -93,12 +94,10 @@ void entry_point(Command_Line command_line) {
       token = current_token(&lexer);
       switch (token.type) {
         case Token_Table: {
-          generate_table(&lexer, file_path);
+          String8 output_file = path_join(scratch.arena, output, path_get_file_name_no_ext(input_file));
+          generate_table(&lexer, output_file);
         } break;
       }
     }
-
   }
-
-  system("pause");
 }
