@@ -7,9 +7,14 @@
 function void
 entry_point(Command_Line* command_line)
 {
-  Arena* arena  = arena_alloc();
+  Arena* arena = arena_alloc();
   os_console_init();
 
+  Lexer* lexer = NULL;
+  Token_Array token_array = load_all_tokens(arena, lexer, S("C:/Personal/fz_meta/test.fz_meta"));
+  fzg_generate(arena, token_array);
+
+  printf("End.\n");
 }
 
 function void

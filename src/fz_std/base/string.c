@@ -387,6 +387,14 @@ char8_is_symbol(u8 c)
 }
 
 function b32
+char8_is_hexadecimal(u8 c)
+{
+  return char8_is_digit(c) ||
+         (c >= 'A' && c <= 'F') ||
+         (c >= 'a' && c <= 'f');
+}
+
+function b32
 char8_is_space(u8 c)
 {
   return c == ' ' || c == '\r' || c == '\t' || c == '\f' || c == '\v' || c == '\n';

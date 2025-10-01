@@ -38,7 +38,7 @@ function b32     string8_find_first(String8 str, String8 substring, u64* index);
 function b32     string8_find_last(String8 str, String8 substring, u64* index); /* Find last occurrence of substring, write index. */
 function b32     string8_match(String8 a, String8 b, b32 case_sensitive); /* Compare strings for equality with case sensitivity option. */
 function String8 string8_from_format(Arena* arena, char const* fmt, ...); /* Printf-style string formatting into arena. */
-function u64     string8_hash(String8 str);
+function u64     string8_hash(String8 str); /* Hashes the string with DJB2 hash */
 
 function String8_List string8_split(Arena* arena, String8 str, String8 split_character); /* Split string by delimiter into list. */
 function String8_List string8_list_new(Arena* arena, String8 str); /* Create new list with single string element. */
@@ -60,6 +60,7 @@ function b32 char8_is_alpha_upper(u8 c); /* Check if character is uppercase lett
 function b32 char8_is_alpha_lower(u8 c); /* Check if character is lowercase letter. */
 function b32 char8_is_digit(u8 c); /* Check if character is digit 0-9. */
 function b32 char8_is_symbol(u8 c); /* Check if character is symbol/punctuation. */
+function b32 char8_is_hexadecimal(u8 c); /* Checks if a character is a valid hexadecimal character */
 function b32 char8_is_space(u8 c); /* Check if character is whitespace. */
 function u8  char8_to_upper(u8 c); /* Convert character to uppercase. */
 function u8  char8_to_lower(u8 c); /* Convert character to lowercase. */

@@ -1,0 +1,35 @@
+
+@table(name, type, max)
+UI_Stack_Table
+{
+  { parent           `UI_Node*`        32 }
+  { top_left         Vec2f32           32 }
+  { alignment_kind   UI_Alignment_Kind 32 }
+  { background_color Color             32 }
+}
+
+@plain
+{
+  @expand(UI_StackTable a) `typedef struct UI_$(a.name)Node UI_$(a.name)Node; struct UI_$(a.name)Node{UI_$(a.name)Node *next; $(a.type) v;};`
+}
+
+@struct UI_Stack
+{
+  @expand(UI_Stack_Table) $(a.type) $(a.name(
+}
+
+@enum UI_Stack_Enum
+{
+  @expand(UI_Stack_Table a) `  $(a.name)`,
+  Count,
+}
+
+@enum_bitflag UI_Stack_Flags
+{
+  @expand(UI_Stack_Table a) `$(a.name)`
+}
+
+@stack_array UI_Stack_Array(String8)
+{
+  @expand(UI_Stack_Table a) `S("$(a.name)")`
+}

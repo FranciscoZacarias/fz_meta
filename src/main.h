@@ -6,11 +6,11 @@
 
 // *.h
 #include "lexer.h"
-#include "table.h"
+#include "gen.h"
 
 // *.c
 #include "lexer.c"
-#include "table.c"
+#include "gen.c"
 
 function void handle_command_line_arguments(Arena* arena, Command_Line* command_line, String8* input_file, String8* input_directory, String8* output_directory);
 
