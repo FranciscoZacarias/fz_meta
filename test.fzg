@@ -4,7 +4,7 @@ UI_Stack_Table (name, type, max)
 {
   { parent           `UI_Node*`        3.2 }
   { top_left         `typedef struct `           -32 }
-  { alignment_kind   "UI_Alignment_Kind" -3.2 }
+  { alignment_kind   `UI_Alignment_Kind` -3.2 }
   { background_color Color             32 }
   { text_color Color             32 }
   { button_color Color             32 }
@@ -15,7 +15,7 @@ UI_Stack_Table (name, type, max)
 
 @generate
 {
-  @foreach(UI_Stack_Table) `typedef struct UI_$(name)Node UI_$(name)Node; struct UI_$(name)Node{UI_$(name)Node *next; $(type) v;};`
+  @foreach(UI_Stack_Table) `typedef struct UI_$(name)Node UI_$(name)Node;\nstruct UI_$(name)Node{\n  UI_$(name)Node *next;\n  $(type) v;\n};`
 }
 
 @enum

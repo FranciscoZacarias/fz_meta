@@ -160,10 +160,15 @@ function FZG_Token       fzg_lexer_backtick_block(Lexer* lexer);
 // Generator
 function void          fzg_init();
 function FZG_Context*  fzg_generate(FZG_Token_Array* token_array);
+function void          fzg_parse_table(FZG_Token_Array *tokens, u32 *i);
+function void          fzg_parse_generator(FZG_Token_Array *tokens, u32 *i);
+function void          fzg_parse_enum(FZG_Token_Array *tokens, u32 *i);
 function void          fzg_expect_token(FZG_Token* token, FZG_Token_Type expected_type);
 function FZG_Table_Row fzg_row_copy(Arena* arena, FZG_Table_Row source);
 function FZG_Table*    fzg_get_table_by_name(String8 name);
 function void          fzg_parse_template_text(FZG_Generator* generator);
+function void          fzg_write_generators(String8 output_file);
+function void          fzg_write_enums(String8 output_file);
 
 #endif // FZG_H
 

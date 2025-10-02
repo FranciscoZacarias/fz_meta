@@ -10,38 +10,14 @@ entry_point(Command_Line* command_line)
   FZG_Token_Array token_array = fzg_lexer_load_all_tokens(arena, lexer, S("C:/Personal/fz_meta/test.fzg"));
 
   fzg_init();
-  FZG_Context* fzg_ctxt = fzg_generate(&token_array);
+  
+  String8 output_file = S("C:/Personal/fz_meta/src/generated/text.c");
 
-  String8_List buffer = {0};
+  os_file_wipe(output_file);
 
-  for (u32 generator_idx = 0; generator_idx < fzg_ctxt->generators_count; generator_idx += 1)
-  {
-    FZG_Generator* generator = &fzg_ctxt->generators[generator_idx];
-
-    for (u32 row_idx = 0; row_idx < generator->table->row_count; row_idx += 1)
-    {
-      FZG_Table_Row row = generator->table->rows[row_idx];
-
-      String8 row_final_text = string8_copy(fzg_ctxt->arena, generator->template_text);
-      for (u32 i = 0; i < generator->template_parameters_count; i += 1)
-      {
-        FZG_Template_Parameter* parameter = &generator->template_parameters[i];
-        for (u32 j = 0; j < row_final_text.size; j += 1)
-        {
-          if (j + parameter->variable.size > row_final_text.size)
-          {
-            break;
-          }
-          if (MemoryMatch(&row_final_text.str[j], parameter->variable.str, parameter->variable.size))
-          {
-            row_final_text = string8_replace_first(fzg_ctxt->arena, row_final_text, parameter->variable, row.fields[parameter->header_index]);
-          }
-        }
-      }
-      row_final_text = string8_concat(fzg_ctxt->arena, row_final_text, S("\n"));
-      // TODO(Fz): append to file here.
-    }
-  }
+  fzg_generate(&token_array);
+  fzg_write_generators(output_file);
+  fzg_write_enums(output_file);
 }
 
 function FZG_Token_Array
@@ -561,63 +537,108 @@ fzg_row_copy(Arena* arena, FZG_Table_Row source)
 }
 
 function void
-fzg_parse_template_text(FZG_Generator* generator)
+fzg_parse_template_text(FZG_Generator *gen)
 {
-  Scratch scratch = scratch_begin(0,0);
-#define advance_generator_template() Statement(i += 1; if (i >= generator->template_text.size) { emit_fatal(S("Error parsing template.")); } c = generator->template_text.str[i]; )
-  for (u32 i = 0; i < generator->template_text.size; i += 1)
+  Scratch scratch = scratch_begin(0, 0);
+
+  u8 *text = gen->template_text.str;
+  u32 size = gen->template_text.size;
+
+  #define advance() Statement(i += 1; if (i >= size) { emit_fatal(S("Error parsing template.")); }c = text[i];)
+
+  for (u32 i = 0; i < size; i += 1)
   {
-    u8 c = generator->template_text.str[i];
+    u8 c = text[i];
     if (c == '$')
     {
-      u32 variable_index_begin = i;
-      advance_generator_template();
-      if (c == '(')
-      {
-        advance_generator_template();
-        u32 variable_index_end   = i;
-        for(;;)
-        {
-          advance_generator_template();
-          variable_index_end = i;
-          if (c == ')')
-          {
-            variable_index_end += 1;
-            break;
-          }
-        }
+      u32 var_begin = i;
 
-        FZG_Template_Parameter* parameter = &generator->template_parameters[generator->template_parameters_count++];
-
-        parameter->variable.size = variable_index_end - variable_index_begin;
-        parameter->variable.str  = push_array(fzg_context.arena, u8, variable_index_end - variable_index_begin);
-        MemoryCopy(parameter->variable.str, generator->template_text.str + variable_index_begin, parameter->variable.size);
-        
-        u32 header_index = -1;
-        for (u32 j = 0; j < generator->table->header_count; j += 1)
-        {
-          String8 header = generator->table->headers[j];
-          String8 parameter_variable_trimmed = string8_slice(parameter->variable,2, parameter->variable.size-1);
-          if (string8_match(header, parameter_variable_trimmed, true))
-          {
-            header_index = j;
-            break;
-          }
-        }
-        if (header_index == -1)
-        {
-          emit_fatal(Sf(fzg_context.arena, "Could not find variable "S_FMT" in table "S_FMT"", S_ARG(parameter->variable), S_ARG(generator->table->name)));
-        }
-
-        parameter->header_index = header_index;
-        
-      }
-      else
+      advance();
+      if (c != '(')
       {
         emit_fatal(S("Expected ( after $ in string template."));
       }
+
+      advance();
+      u32 var_end = i;
+
+      for (;;)
+      {
+        advance();
+        var_end = i;
+        if (c == ')')
+        {
+          var_end += 1;
+          break;
+        }
+      }
+
+      FZG_Template_Parameter *param = &gen->template_parameters[gen->template_parameters_count++];
+
+      param->variable.size = var_end - var_begin;
+      param->variable.str  = push_array(fzg_context.arena, u8, param->variable.size);
+      MemoryCopy(param->variable.str, text + var_begin, param->variable.size);
+
+      String8 trimmed = string8_slice(param->variable, 2, param->variable.size - 1);
+
+      s32 header_index = -1;
+      for (u32 j = 0; j < gen->table->header_count; j += 1)
+      {
+        if (string8_match(gen->table->headers[j], trimmed, true))
+        {
+          header_index = (s32)j;
+          break;
+        }
+      }
+
+      if (header_index < 0)
+      {
+        emit_fatal(Sf(fzg_context.arena,
+                      "Could not find variable " S_FMT " in table " S_FMT,
+                      S_ARG(param->variable), S_ARG(gen->table->name)));
+      }
+
+      param->header_index = (u32)header_index;
     }
   }
-#undef advance_generator_template
+
+  #undef advance
   scratch_end(&scratch);
+}
+
+function void
+fzg_write_generators(String8 output_file)
+{
+  String8_List buffer = {0};
+
+  for (u32 gen_i = 0; gen_i < fzg_context.generators_count; gen_i += 1)
+  {
+    FZG_Generator *gen = &fzg_context.generators[gen_i];
+    FZG_Table *table = gen->table;
+
+    for (u32 row_i = 0; row_i < table->row_count; row_i += 1)
+    {
+      FZG_Table_Row row = table->rows[row_i];
+      String8 text = string8_copy(fzg_context.arena, gen->template_text);
+
+      for (u32 param_i = 0; param_i < gen->template_parameters_count; param_i += 1)
+      {
+        FZG_Template_Parameter *param = &gen->template_parameters[param_i];
+        String8 replacement = row.fields[param->header_index];
+
+        // string8_replace_first does the searching
+        text = string8_replace_first(fzg_context.arena, text, param->variable, replacement);
+      }
+
+      text = string8_replace_all(fzg_context.arena, text, S("\\n"), S("\n"));
+      text = string8_concat(fzg_context.arena, text, S("\n"));
+      os_file_append(output_file, text.str, text.size);
+      // TODO(Fz): append 'text' to buffer or file
+    }
+  }
+}
+
+function void
+fzg_write_enums(String8 output_file)
+{
 }

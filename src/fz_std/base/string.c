@@ -52,6 +52,32 @@ string8_replace_first(Arena* arena, String8 str, String8 a, String8 b)
   return (String8){ new_size, mem };
 }
 
+function String8
+string8_replace_all(Arena *arena, String8 str, String8 a, String8 b)
+{
+  if (a.size == 0) return string8_copy(arena, str);
+
+  String8 result = string8_copy(arena, str);
+  u64 index = 0;
+
+  while (string8_find_first(result, a, &index))
+  {
+    u64 new_size = result.size - a.size + b.size;
+    u8 *mem = (u8 *)arena_push(arena, new_size);
+
+    memcpy(mem, result.str, index);
+    memcpy(mem + index, b.str, b.size);
+    u64 after_size = result.size - (index + a.size);
+    memcpy(mem + index + b.size, result.str + index + a.size, after_size);
+
+    result.str = mem;
+    result.size = new_size;
+  }
+
+  return result;
+}
+
+
 function b32
 string8_match(String8 a, String8 b, b32 case_sensitive)
 {

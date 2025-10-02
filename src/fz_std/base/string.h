@@ -34,6 +34,7 @@ function String8 string8_copy(Arena* arena, String8 source); /* Allocate and cop
 function String8 string8_range(u8* first, u8* range); /* Create String8 from first pointer to range pointer (exclusive). */
 function String8 string8_concat(Arena* arena, String8 a, String8 b); /* Allocate concatenated string a+b in arena. */
 function String8 string8_replace_first(Arena* arena, String8 str, String8 a, String8 b); /* Replaces string a with string c in string str */
+function String8 string8_replace_all(Arena *arena, String8 str, String8 a, String8 b); /* Replaces all instances of a substr a with substr b */
 function String8 string8_slice(String8 str, u64 start, u64 end); /* Extract substring from start to end (exclusive). */
 function String8 string8_trim(String8 str); /* Remove leading and trailing whitespace. */
 function b32     string8_contains(String8 str, String8 substring); /* Check if str contains substring. */
