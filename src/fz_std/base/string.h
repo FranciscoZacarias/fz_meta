@@ -14,13 +14,15 @@ struct String8 {
 #define S_ARG(str8) (s32)str8.size, str8.str
 
 typedef struct String8_Node String8_Node;
-struct String8_Node {
+struct String8_Node
+{
   struct String8_Node* next;
   String8 value;
 };
 
 typedef struct String8_List String8_List;
-struct String8_List {
+struct String8_List
+{
   String8_Node* first;
   String8_Node* last;
   u64 node_count;

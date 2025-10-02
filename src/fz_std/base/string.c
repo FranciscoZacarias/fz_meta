@@ -220,7 +220,7 @@ string8_list_pop(String8_List* list)
 function void
 string8_list_push(Arena* arena, String8_List* list, String8 str)
 {
-  String8_Node* node = push_array(arena, String8_Node, sizeof(String8_Node));
+  String8_Node* node = push_array(arena, String8_Node, 1);
   node->value = str;
   if (!list->first && !list->last)
   {

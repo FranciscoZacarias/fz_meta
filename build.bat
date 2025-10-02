@@ -1,6 +1,6 @@
 @echo off
 
-set compiler_and_entry=cl ..\src\main.c
+set compiler_and_entry=cl ..\src\fzgen.c
 
 REM Enable warnings with: /W4 /wd4201
 REM /wd4201 Ignores the compiler warning C4201 about nameless structs/unions

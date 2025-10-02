@@ -1,0 +1,31 @@
+
+@table
+UI_Stack_Table (name, type, max)
+{
+  { parent           `UI_Node*`        3.2 }
+  { top_left         `typedef struct `           -32 }
+  { alignment_kind   "UI_Alignment_Kind" -3.2 }
+  { background_color Color             32 }
+  { text_color Color             32 }
+  { button_color Color             32 }
+  { border_color Color             32 }
+  { hover_color Color             32 }
+  { active_color Color             32 }
+}
+
+@generate
+{
+  @foreach(UI_Stack_Table) `typedef struct UI_$(name)Node UI_$(name)Node; struct UI_$(name)Node{UI_$(name)Node *next; $(type) v;};`
+}
+
+@enum
+UI_Stack_Enum
+{
+  @foreach(UI_Stack_Table) `$(name)`
+}
+
+@enum @bitflags
+UI_Stack_Flags (u32)
+{
+  @foreach(UI_Stack_Table) `$(name)`
+}
