@@ -30,14 +30,16 @@ entry_point(Command_Line* command_line)
         {
           if (j + parameter->variable.size > row_final_text.size)
           {
-            emit_fatal(S("Wrong row parameters"));
+            break;
           }
-          if (MemoryMatch(row_final_text.str[j], parameter->variable.str, parameter->variable.size))
+          if (MemoryMatch(&row_final_text.str[j], parameter->variable.str, parameter->variable.size))
           {
-            
+            row_final_text = string8_replace_first(fzg_ctxt->arena, row_final_text, parameter->variable, row.fields[parameter->header_index]);
           }
         }
       }
+      row_final_text = string8_concat(fzg_ctxt->arena, row_final_text, S("\n"));
+      // TODO(Fz): append to file here.
     }
   }
 }
@@ -568,11 +570,11 @@ fzg_parse_template_text(FZG_Generator* generator)
     u8 c = generator->template_text.str[i];
     if (c == '$')
     {
+      u32 variable_index_begin = i;
       advance_generator_template();
       if (c == '(')
       {
         advance_generator_template();
-        u32 variable_index_begin = i;
         u32 variable_index_end   = i;
         for(;;)
         {
@@ -580,6 +582,7 @@ fzg_parse_template_text(FZG_Generator* generator)
           variable_index_end = i;
           if (c == ')')
           {
+            variable_index_end += 1;
             break;
           }
         }
@@ -594,7 +597,8 @@ fzg_parse_template_text(FZG_Generator* generator)
         for (u32 j = 0; j < generator->table->header_count; j += 1)
         {
           String8 header = generator->table->headers[j];
-          if (string8_match(header, parameter->variable, true))
+          String8 parameter_variable_trimmed = string8_slice(parameter->variable,2, parameter->variable.size-1);
+          if (string8_match(header, parameter_variable_trimmed, true))
           {
             header_index = j;
             break;

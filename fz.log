@@ -204,3 +204,22 @@ INFO :: 2025-October-02 14:18:26.238 :: C:\Personal\fz_meta\src\fz_std\base\entr
 INFO :: 2025-October-02 14:19:25.497 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
 INFO :: 2025-October-02 14:21:45.003 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
 INFO :: 2025-October-02 14:21:59.558 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-02 15:24:16.888 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-02 15:24:38.077 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-02 15:27:32.384 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-02 15:27:36.141 :: C:\Personal\fz_meta\src\fzgen.c:605: Could not find variable (name in table UI_Stack_Table
+INFO :: 2025-October-02 15:28:43.624 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-02 15:28:43.668 :: C:\Personal\fz_meta\src\fzgen.c:606: Could not find variable $(name) in table UI_Stack_Table
+INFO :: 2025-October-02 15:30:09.848 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-02 15:30:09.891 :: C:\Personal\fz_meta\src\fzgen.c:607: Could not find variable $(name) in table UI_Stack_Table
+INFO :: 2025-October-02 15:30:36.346 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-02 15:30:36.389 :: C:\Personal\fz_meta\src\fzgen.c:607: Could not find variable $(name) in table UI_Stack_Table
+INFO :: 2025-October-02 15:31:01.736 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-02 15:31:45.754 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-02 15:31:45.797 :: C:\Personal\fz_meta\src\fzgen.c:606: Could not find variable $(name) in table UI_Stack_Table
+INFO :: 2025-October-02 15:31:52.750 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-02 15:33:10.403 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-02 15:33:15.649 :: C:\Personal\fz_meta\src\fzgen.c:33: Wrong row parameters
+INFO :: 2025-October-02 15:33:51.527 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-02 15:40:45.373 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-02 15:41:41.800 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
