@@ -276,3 +276,81 @@ INFO :: 2025-October-02 16:26:50.362 :: C:\Personal\fz_meta\src\fz_std\base\entr
 INFO :: 2025-October-02 16:27:15.517 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
 INFO :: 2025-October-02 16:27:19.492 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
 INFO :: 2025-October-02 16:29:04.796 :: C:\Personal\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-03 18:23:10.699 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-03 18:24:11.654 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-03 18:24:58.025 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-03 18:25:02.671 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-03 18:25:10.285 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-03 18:26:32.523 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:28:59.010 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:28:59.061 :: D:\work\fz_meta\src\fzgen.c:465: Expected token type 4 but got 1
+INFO :: 2025-October-04 00:29:14.628 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:30:48.518 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:31:01.148 :: D:\work\fz_meta\src\fzgen.c:543: Could not find variable $(name) in table UI_Stack_Table
+INFO :: 2025-October-04 00:31:23.052 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:31:24.293 :: D:\work\fz_meta\src\fzgen.c:543: Could not find variable $(name) in table UI_Stack_Table
+INFO :: 2025-October-04 00:31:38.319 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:33:09.886 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:33:18.419 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:34:21.164 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:34:43.999 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:35:06.146 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:35:10.386 :: D:\work\fz_meta\src\fzgen.c:418: Unhandled command typedef struct UI_$(name)Node UI_$(name)Node;\nstruct UI_$(name)Node{\n  UI_$(name)Node *next;\n  $(type) v;\n}; on generate
+INFO :: 2025-October-04 00:36:03.947 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:36:04.013 :: D:\work\fz_meta\src\fzgen.c:464: Expected token type 4 but got 8
+INFO :: 2025-October-04 00:36:37.995 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:37:38.793 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:38:02.862 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:45:26.070 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:45:26.120 :: D:\work\fz_meta\src\fzgen.c:544: Could not find variable $(size) in table UI_Stacks
+INFO :: 2025-October-04 00:45:35.702 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:47:33.701 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:48:19.699 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:48:19.745 :: D:\work\fz_meta\src\fzgen.c:465: Expected token type 3 but got 0
+INFO :: 2025-October-04 00:48:27.258 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:48:33.228 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:48:33.276 :: D:\work\fz_meta\src\fzgen.c:465: Expected token type 3 but got 0
+INFO :: 2025-October-04 00:48:43.213 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:48:43.260 :: D:\work\fz_meta\src\fzgen.c:465: Expected token type 3 but got 0
+INFO :: 2025-October-04 00:49:23.088 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:49:31.011 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:49:39.703 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:51:28.306 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:51:52.405 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:52:23.129 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:52:59.779 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+FATAL :: 2025-October-04 00:52:59.830 :: D:\work\fz_meta\src\fzgen.c:432: Unexpected global identifier: inline
+INFO :: 2025-October-04 00:53:10.159 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:54:35.450 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:55:10.657 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:57:01.874 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:57:26.776 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:57:38.806 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:58:01.174 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 00:59:47.463 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:00:58.674 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:01:49.248 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:03:27.718 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:05:04.477 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:05:15.630 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:05:42.287 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:05:51.610 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:06:02.898 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:07:58.704 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:08:11.462 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:08:24.359 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:13:16.103 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:13:21.065 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:13:23.556 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:17:14.461 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:17:40.948 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:17:55.476 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:18:27.420 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:18:37.799 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:19:03.242 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:19:08.331 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:19:16.353 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:23:59.163 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:24:09.890 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:24:44.982 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<
+INFO :: 2025-October-04 01:24:51.721 :: D:\work\fz_meta\src\fz_std\base\entry_point.c:13: >>>> Entry point <<<<

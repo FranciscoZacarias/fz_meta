@@ -1,31 +1,42 @@
 
 @table
-UI_Stack_Table (name, type, max)
+UI_Stacks (name_upper, name_lower, type, default_value)
 {
-  { parent           `UI_Node*`        3.2 }
-  { top_left         `typedef struct `           -32 }
-  { alignment_kind   `UI_Alignment_Kind` -3.2 }
-  { background_color Color             32 }
-  { text_color Color             32 }
-  { button_color Color             32 }
-  { border_color Color             32 }
-  { hover_color Color             32 }
-  { active_color Color             32 }
+  { Node      node     `UI_Node*`            `(UI_Node){0}` }
+  { Top_Left  top_left  Vec2f32              `vec2f32(0.0f,0.0f)` }
+  { Size_X    size_x    f32                  `g_os_window.dimensions.x` }
+  { Size_Y    size_y    f32                  `g_os_window.dimensions.y` }
+  { Padding_X padding_x f32                  `0.0f` }
+  { Padding_Y padding_y f32                  `0.0f` }
+  { Spacing_X spacing_x f32                  `0.0f` }
+  { Spacing_Y spacing_y f32                  `0.0f` }
+  { Alignment_Kind    alignment_kind    UI_Alignment_Kind    `UI_Alignment_Kind_Y` }
+  { Width_Kind        width_kind        UI_Width_Kind        `UI_Width_Kind_Fill` }
+  { Height_Kind       height_kind       UI_Height_Kind       `UI_Height_Kind_Fill` }
+  { Node_Color_Scheme node_color_scheme UI_Node_Color_Scheme `ui_context.color_scheme.window` }
+  { Border_Color             border_color             Color   `PURPLE(1)` }
+  { Background_Color         background_color         Color   `PURPLE(1)` }
+  { Background_Hover_Color   background_hover_color   Color   `PURPLE(1)` }
+  { Background_Active_Color  background_active_color  Color   `PURPLE(1)` }
+  { Text_Color               text_color               Color   `PURPLE(1)` }
+  { Text_Hover_Color         text_hover_color         Color   `PURPLE(1)` }
+  { Text_Active_Color        text_active_color        Color   `PURPLE(1)` }
 }
 
 @generate
 {
-  @foreach(UI_Stack_Table) `typedef struct UI_$(name)Node UI_$(name)Node;\nstruct UI_$(name)Node{\n  UI_$(name)Node *next;\n  $(type) v;\n};`
-}
+  @inline `// @Generated code \n`
+  
+  @inline `#define MAX_STACKS_DEFAULT 32\n\n`
+  @inline `#define UI_Context_Member_Stack_Declarations \\n`
+  @foreach(UI_Stacks) `  struct { $(type) data[MAX_STACKS_DEFAULT]; u32 top_index; $(type) bottom_val; } $(name_lower)_stack; \\n`
+  @inline `  /* macro terminator */\n\n`
 
-@enum
-UI_Stack_Enum
-{
-  @foreach(UI_Stack_Table) `$(name)`
-}
+  @inline `#define UI_Context_Member_Stacks_Init \\n`
+  @foreach(UI_Stacks) `  ui_context.$(name_lower)_stack.top_index = 0; ui_context.$(name_lower)_stack.bottom_val = default_val; MemoryZeroArray(ui_context.$(name_lower)_stack.data); \\n`
+  @inline `  /* macro terminator */\n\n`
 
-@enum @bitflags
-UI_Stack_Flags (u32)
-{
-  @foreach(UI_Stack_Table) `$(name)`
+  @inline `#define UI_Context_Member_Stacks_Debug_Top_At_Zero \\n`
+  @foreach(UI_Stacks) `  if(ui_context.$(name_lower)_stack.top_index != 0) emit_fatal(Sf(ui_context.arena, "UI: Stack "S_FMT" not at 0. Actual value: '%u'", S_ARG(S("$(name_lower)_stack")), ui_context.$(name_lower)_stack.top_index); \\n`
+  @inline `  /* macro terminator */\n\n`
 }

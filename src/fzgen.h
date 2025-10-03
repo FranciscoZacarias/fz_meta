@@ -102,33 +102,38 @@ struct FZG_Table
 typedef struct FZG_Template_Parameter FZG_Template_Parameter;
 struct FZG_Template_Parameter
 {
-  u32 header_index; // E.g. For the headers (name, age, height), and row iterator 'a', a.name -> header_index = 0
+  u32 header_index; // E.g. For the headers (name, age, height), name -> header_index = 0, age -> header_index = 1 ...
   String8 variable;
 };
 
-#define FZG_MAX_TEMPLATE_PARAMETERS 16
-typedef struct FZG_Generator FZG_Generator;
-struct FZG_Generator
+typedef enum
 {
-  FZG_Table* table;
+  FZG_Command_None = 0,
+  FZG_Command_Inline,
+  FZG_Command_Foreach,
+} FZG_Command_Kind;
+
+#define FZG_MAX_TEMPLATE_PARAMETERS 16
+typedef struct FZG_Command FZG_Command;
+struct FZG_Command
+{
+  FZG_Command_Kind kind;
   String8 template_text;
   FZG_Template_Parameter template_parameters[FZG_MAX_TEMPLATE_PARAMETERS];
   u32 template_parameters_count;
 };
 
-typedef struct FZG_Enum FZG_Enum;
-struct FZG_Enum
+#define MAX_COMMANDS 16
+typedef struct FZG_Generator FZG_Generator;
+struct FZG_Generator
 {
-  FZG_Generator generator;
-  String8 enum_name;
-  String8 type;
-  b32 is_bitflag;
-  b32 has_type;
+  FZG_Table* table;
+  FZG_Command command_queue[MAX_COMMANDS];
+  u32 command_count;
 };
 
 #define FZG_MAX_TABLES 8
 #define FZG_MAX_GENERATORS 16
-#define FZG_MAX_ENUMS 16
 typedef struct FZG_Context FZG_Context;
 struct FZG_Context
 {
@@ -139,9 +144,6 @@ struct FZG_Context
 
   FZG_Generator* generators;
   u32 generators_count;
-  
-  FZG_Enum* enums;
-  u32 enums_count;
 };
 
 // Globals
@@ -162,13 +164,11 @@ function void          fzg_init();
 function FZG_Context*  fzg_generate(FZG_Token_Array* token_array);
 function void          fzg_parse_table(FZG_Token_Array *tokens, u32 *i);
 function void          fzg_parse_generator(FZG_Token_Array *tokens, u32 *i);
-function void          fzg_parse_enum(FZG_Token_Array *tokens, u32 *i);
 function void          fzg_expect_token(FZG_Token* token, FZG_Token_Type expected_type);
 function FZG_Table_Row fzg_row_copy(Arena* arena, FZG_Table_Row source);
 function FZG_Table*    fzg_get_table_by_name(String8 name);
-function void          fzg_parse_template_text(FZG_Generator* generator);
+function void          fzg_parse_template_text(FZG_Table* table, FZG_Command* command);
 function void          fzg_write_generators(String8 output_file);
-function void          fzg_write_enums(String8 output_file);
 
 #endif // FZG_H
 

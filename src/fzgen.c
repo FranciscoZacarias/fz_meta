@@ -7,17 +7,16 @@ entry_point(Command_Line* command_line)
   os_console_init();
 
   Lexer* lexer = NULL;
-  FZG_Token_Array token_array = fzg_lexer_load_all_tokens(arena, lexer, S("C:/Personal/fz_meta/test.fzg"));
+  FZG_Token_Array token_array = fzg_lexer_load_all_tokens(arena, lexer, S("D:/work/fz_meta/test.fzg"));
 
   fzg_init();
   
-  String8 output_file = S("C:/Personal/fz_meta/src/generated/text.c");
+  String8 output_file = S("D:/work/fz_meta/src/generated/text.c");
 
   os_file_wipe(output_file);
 
   fzg_generate(&token_array);
   fzg_write_generators(output_file);
-  fzg_write_enums(output_file);
 }
 
 function FZG_Token_Array
@@ -239,8 +238,6 @@ fzg_init()
   fzg_context.tables_count     = 0;
   fzg_context.generators       = push_array(fzg_context.arena, FZG_Generator, FZG_MAX_GENERATORS);
   fzg_context.generators_count = 0;
-  fzg_context.enums            = push_array(fzg_context.arena, FZG_Enum, FZG_MAX_ENUMS);
-  fzg_context.enums_count      = 0;
 }
 
 function FZG_Context*
@@ -330,8 +327,12 @@ fzg_generate(FZG_Token_Array* token_array)
 
               for (;;)
               {
-                token = &token_array->tokens[token_index++];
-                if (token->type == FZG_Token_Close_Brace)
+                token = next_token();
+                if (token->type == FZG_Token_Comma)
+                {
+                  continue;
+                }
+                else if (token->type == FZG_Token_Close_Brace)
                 {
                   break;
                 }
@@ -379,100 +380,48 @@ fzg_generate(FZG_Token_Array* token_array)
 
             token = next_token();
             fzg_expect_token(token, FZG_Token_Open_Brace);
+            token = next_token();
             
-            token = next_token();
-            fzg_expect_token(token, FZG_Token_At);
+            while (token->type != FZG_Token_Close_Brace)
+            {
+              fzg_expect_token(token, FZG_Token_At);
             
-            token = next_token();
-            if (string8_match(token->value, S("foreach"), false))
-            {
               token = next_token();
-              fzg_expect_token(token, FZG_Token_Open_Parenthesis);
-
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_Identifier);
-              generator->table = fzg_get_table_by_name(token->value);
-              
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_Close_Parenthesis);
-
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_String_Literal);
-              generator->template_text = token->value;
-              generator->template_parameters_count = 0;
-              fzg_parse_template_text(generator);
-            }
-            else
-            {
-              emit_fatal(Sf(scratch.arena, "Unhandled command "S_FMT" on generate", S_ARG(token->value)));
-            }
-          }
-          else if (string8_match(S("enum"), token->value, false))
-          {
-            FZG_Enum* fzg_enum = &fzg_context.enums[fzg_context.enums_count++];
-            fzg_enum->is_bitflag = false;
-
-            token = next_token();
-            if (token->type == FZG_Token_At)
-            {
-              token = next_token();
-              if (string8_match(token->value, S("bitflags"), false))
+              if (string8_match(token->value, S("foreach"), false))
               {
-                fzg_enum->is_bitflag = true;
                 token = next_token();
+                fzg_expect_token(token, FZG_Token_Open_Parenthesis);
+
+                token = next_token();
+                fzg_expect_token(token, FZG_Token_Identifier);
+                generator->table = fzg_get_table_by_name(token->value);
+              
+                token = next_token();
+                fzg_expect_token(token, FZG_Token_Close_Parenthesis);
+
+                token = next_token();
+                fzg_expect_token(token, FZG_Token_String_Literal);
+
+                FZG_Command* command = &generator->command_queue[generator->command_count++];
+                command->kind = FZG_Command_Foreach;
+                command->template_text = token->value;
+                fzg_parse_template_text(generator->table, command);
+              }
+              else if (string8_match(token->value, S("inline"), false))
+              {
+                token = next_token();
+                fzg_expect_token(token, FZG_Token_String_Literal);
+
+                FZG_Command* command = &generator->command_queue[generator->command_count++];
+                command->kind = FZG_Command_Inline;
+                command->template_text = token->value;
+                fzg_parse_template_text(generator->table, command);
               }
               else
               {
-                emit_fatal(Sf(scratch.arena, "Unhandled command "S_FMT" on enum", S_ARG(token->value)));
+                emit_fatal(Sf(scratch.arena, "Unhandled command "S_FMT" on generate", S_ARG(token->value)));
               }
-            }
-
-            fzg_expect_token(token, FZG_Token_Identifier);
-            fzg_enum->enum_name = string8_copy(fzg_context.arena, token->value);
-            
-            token = next_token();
-
-            // Parse enum type
-            if (token->type == FZG_Token_Open_Parenthesis)
-            {
               token = next_token();
-              fzg_expect_token(token, FZG_Token_Identifier);
-              fzg_enum->type = string8_copy(fzg_context.arena, token->value);
-              fzg_enum->has_type = true;
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_Close_Parenthesis);
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_Open_Brace);
-            }
-            else
-            {
-              fzg_expect_token(token, FZG_Token_Open_Brace);
-            }
-
-            token = next_token();
-            fzg_expect_token(token, FZG_Token_At);
-
-            token = next_token();
-            if (string8_match(token->value, S("foreach"), false))
-            {
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_Open_Parenthesis);
-
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_Identifier);
-              fzg_enum->generator.template_parameters_count = 0;
-              fzg_enum->generator.table = fzg_get_table_by_name(token->value);
-              
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_Close_Parenthesis);
-
-              token = next_token();
-              fzg_expect_token(token, FZG_Token_String_Literal);
-              fzg_enum->generator.template_text = token->value;
-            }
-            else
-            {
-              emit_fatal(Sf(scratch.arena, "Unhandled command "S_FMT" on generate", S_ARG(token->value)));
             }
           }
           else
@@ -537,14 +486,14 @@ fzg_row_copy(Arena* arena, FZG_Table_Row source)
 }
 
 function void
-fzg_parse_template_text(FZG_Generator *gen)
+fzg_parse_template_text(FZG_Table* table, FZG_Command* command)
 {
   Scratch scratch = scratch_begin(0, 0);
 
-  u8 *text = gen->template_text.str;
-  u32 size = gen->template_text.size;
+  u8* text = command->template_text.str;
+  u32 size = command->template_text.size;
 
-  #define advance() Statement(i += 1; if (i >= size) { emit_fatal(S("Error parsing template.")); }c = text[i];)
+  #define advance() Statement(i += 1; if (i >= size) { emit_fatal(S("Error parsing template.")); } c = text[i];)
 
   for (u32 i = 0; i < size; i += 1)
   {
@@ -573,18 +522,19 @@ fzg_parse_template_text(FZG_Generator *gen)
         }
       }
 
-      FZG_Template_Parameter *param = &gen->template_parameters[gen->template_parameters_count++];
+      FZG_Template_Parameter* parameter = &command->template_parameters[command->template_parameters_count++];
 
-      param->variable.size = var_end - var_begin;
-      param->variable.str  = push_array(fzg_context.arena, u8, param->variable.size);
-      MemoryCopy(param->variable.str, text + var_begin, param->variable.size);
+      parameter->variable.size = var_end - var_begin;
+      parameter->variable.str  = push_array(fzg_context.arena, u8, parameter->variable.size);
+      MemoryCopy(parameter->variable.str, text + var_begin, parameter->variable.size);
 
-      String8 trimmed = string8_slice(param->variable, 2, param->variable.size - 1);
+      // trim off "$(" prefix and ")" suffix
+      String8 trimmed = string8_slice(parameter->variable, 2, parameter->variable.size - 1);
 
       s32 header_index = -1;
-      for (u32 j = 0; j < gen->table->header_count; j += 1)
+      for (u32 j = 0; j < table->header_count; j += 1)
       {
-        if (string8_match(gen->table->headers[j], trimmed, true))
+        if (string8_match(table->headers[j], trimmed, true))
         {
           header_index = (s32)j;
           break;
@@ -595,10 +545,10 @@ fzg_parse_template_text(FZG_Generator *gen)
       {
         emit_fatal(Sf(fzg_context.arena,
                       "Could not find variable " S_FMT " in table " S_FMT,
-                      S_ARG(param->variable), S_ARG(gen->table->name)));
+                      S_ARG(parameter->variable), S_ARG(table->name)));
       }
 
-      param->header_index = (u32)header_index;
+      parameter->header_index = (u32)header_index;
     }
   }
 
@@ -613,32 +563,57 @@ fzg_write_generators(String8 output_file)
 
   for (u32 gen_i = 0; gen_i < fzg_context.generators_count; gen_i += 1)
   {
-    FZG_Generator *gen = &fzg_context.generators[gen_i];
-    FZG_Table *table = gen->table;
+    FZG_Generator *generator = &fzg_context.generators[gen_i];
+    FZG_Table *table = generator->table;
 
-    for (u32 row_i = 0; row_i < table->row_count; row_i += 1)
+    for (u32 cmd_i = 0; cmd_i < generator->command_count; cmd_i += 1)
     {
-      FZG_Table_Row row = table->rows[row_i];
-      String8 text = string8_copy(fzg_context.arena, gen->template_text);
+      FZG_Command *cmd = &generator->command_queue[cmd_i];
 
-      for (u32 param_i = 0; param_i < gen->template_parameters_count; param_i += 1)
+      switch (cmd->kind)
       {
-        FZG_Template_Parameter *param = &gen->template_parameters[param_i];
-        String8 replacement = row.fields[param->header_index];
+        case FZG_Command_Inline:
+        {
+          // Inline just writes the template directly (no row loop)
+          String8 text = string8_copy(fzg_context.arena, cmd->template_text);
 
-        // string8_replace_first does the searching
-        text = string8_replace_first(fzg_context.arena, text, param->variable, replacement);
+          for (u32 param_i = 0; param_i < cmd->template_parameters_count; param_i += 1)
+          {
+            FZG_Template_Parameter *param = &cmd->template_parameters[param_i];
+            // Replace with header name itself (Inline has no row context)
+            String8 replacement = table->headers[param->header_index];
+            text = string8_replace_first(fzg_context.arena, text, param->variable, replacement);
+          }
+
+          text = string8_replace_all(fzg_context.arena, text, S("\\n"), S("\n"));
+          os_file_append(output_file, text.str, text.size);
+        } break;
+
+        case FZG_Command_Foreach:
+        {
+          // Foreach expands once per row
+          for (u32 row_i = 0; row_i < table->row_count; row_i += 1)
+          {
+            FZG_Table_Row row = table->rows[row_i];
+            String8 text = string8_copy(fzg_context.arena, cmd->template_text);
+
+            for (u32 param_i = 0; param_i < cmd->template_parameters_count; param_i += 1)
+            {
+              FZG_Template_Parameter *param = &cmd->template_parameters[param_i];
+              String8 replacement = row.fields[param->header_index];
+              text = string8_replace_first(fzg_context.arena, text, param->variable, replacement);
+            }
+
+            text = string8_replace_all(fzg_context.arena, text, S("\\n"), S("\n"));
+            os_file_append(output_file, text.str, text.size);
+          }
+        } break;
+
+        default:
+        {
+          emit_fatal(S("Unknown command kind in generator command queue."));
+        } break;
       }
-
-      text = string8_replace_all(fzg_context.arena, text, S("\\n"), S("\n"));
-      text = string8_concat(fzg_context.arena, text, S("\n"));
-      os_file_append(output_file, text.str, text.size);
-      // TODO(Fz): append 'text' to buffer or file
     }
   }
-}
-
-function void
-fzg_write_enums(String8 output_file)
-{
 }
