@@ -570,6 +570,7 @@ fzg_write_generators()
   fzg_context.output_directory = string8_concat(fzg_context.arena, fzg_context.output_directory, S("/"));
   String8 output_path = string8_concat(fzg_context.arena, fzg_context.output_directory, fzg_context.output_file_name);
   output_path = string8_concat(fzg_context.arena, output_path, S(".fzgen.c"));
+  os_file_wipe(output_path);
 
   String8_List buffer = {0};
 

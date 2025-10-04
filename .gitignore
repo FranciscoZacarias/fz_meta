@@ -2,3 +2,5 @@ build/*
 .git/*
 *.rdbg
 *.10x
+*.log
+*.10x
