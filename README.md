@@ -1,2 +1,2 @@
-# fz_meta
+# fz_gen
 Code generator

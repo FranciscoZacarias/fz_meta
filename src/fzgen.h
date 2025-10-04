@@ -139,6 +139,10 @@ struct FZG_Context
 {
   Arena* arena;
 
+  String8 input_file;
+  String8 output_file_name;
+  String8 output_directory;
+
   FZG_Table* tables;
   u32 tables_count;
 
@@ -168,7 +172,7 @@ function void          fzg_expect_token(FZG_Token* token, FZG_Token_Type expecte
 function FZG_Table_Row fzg_row_copy(Arena* arena, FZG_Table_Row source);
 function FZG_Table*    fzg_get_table_by_name(String8 name);
 function void          fzg_parse_template_text(FZG_Table* table, FZG_Command* command);
-function void          fzg_write_generators(String8 output_file);
+function void          fzg_write_generators();
 
 #endif // FZG_H
 

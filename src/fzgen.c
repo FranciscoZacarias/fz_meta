@@ -6,17 +6,14 @@ entry_point(Command_Line* command_line)
   Arena* arena = arena_alloc();
   os_console_init();
 
+  String8 input_file = os_absolute_path_from_relative_path(arena, command_line->args[0].value);
+
   Lexer* lexer = NULL;
-  FZG_Token_Array token_array = fzg_lexer_load_all_tokens(arena, lexer, S("D:/work/fz_meta/test.fzg"));
+  FZG_Token_Array token_array = fzg_lexer_load_all_tokens(arena, lexer, input_file);
 
   fzg_init();
-  
-  String8 output_file = S("D:/work/fz_meta/src/generated/text.c");
-
-  os_file_wipe(output_file);
-
   fzg_generate(&token_array);
-  fzg_write_generators(output_file);
+  fzg_write_generators();
 }
 
 function FZG_Token_Array
@@ -231,7 +228,6 @@ function void
 fzg_init()
 {
   AssertNoReentry();
-
   fzg_context = (FZG_Context){0};
   fzg_context.arena            = arena_alloc();
   fzg_context.tables           = push_array(fzg_context.arena, FZG_Table, FZG_MAX_TABLES);
@@ -373,6 +369,18 @@ fzg_generate(FZG_Token_Array* token_array)
             {
               table->rows[table->row_count++] = fzg_row_copy(fzg_context.arena, row_node->value);
             }
+          }
+          else if (string8_match(S("output_directory"), token->value, false))
+          {
+            token = next_token();
+            fzg_expect_token(token, FZG_Token_String_Literal);
+            fzg_context.output_directory = os_absolute_path_from_relative_path(fzg_context.arena, string8_copy(fzg_context.arena, token->value));
+          }
+          else if (string8_match(S("output_file_name"), token->value, false))
+          {
+            token = next_token();
+            fzg_expect_token(token, FZG_Token_String_Literal);
+            fzg_context.output_file_name = string8_copy(fzg_context.arena, token->value);
           }
           else if (string8_match(S("generate"), token->value, false))
           {
@@ -557,8 +565,12 @@ fzg_parse_template_text(FZG_Table* table, FZG_Command* command)
 }
 
 function void
-fzg_write_generators(String8 output_file)
+fzg_write_generators()
 {
+  fzg_context.output_directory = string8_concat(fzg_context.arena, fzg_context.output_directory, S("/"));
+  String8 output_path = string8_concat(fzg_context.arena, fzg_context.output_directory, fzg_context.output_file_name);
+  output_path = string8_concat(fzg_context.arena, output_path, S(".fzgen.c"));
+
   String8_List buffer = {0};
 
   for (u32 gen_i = 0; gen_i < fzg_context.generators_count; gen_i += 1)
@@ -574,19 +586,17 @@ fzg_write_generators(String8 output_file)
       {
         case FZG_Command_Inline:
         {
-          // Inline just writes the template directly (no row loop)
           String8 text = string8_copy(fzg_context.arena, cmd->template_text);
 
           for (u32 param_i = 0; param_i < cmd->template_parameters_count; param_i += 1)
           {
             FZG_Template_Parameter *param = &cmd->template_parameters[param_i];
-            // Replace with header name itself (Inline has no row context)
             String8 replacement = table->headers[param->header_index];
             text = string8_replace_first(fzg_context.arena, text, param->variable, replacement);
           }
 
           text = string8_replace_all(fzg_context.arena, text, S("\\n"), S("\n"));
-          os_file_append(output_file, text.str, text.size);
+          os_file_append(output_path, text.str, text.size);
         } break;
 
         case FZG_Command_Foreach:
@@ -605,7 +615,7 @@ fzg_write_generators(String8 output_file)
             }
 
             text = string8_replace_all(fzg_context.arena, text, S("\\n"), S("\n"));
-            os_file_append(output_file, text.str, text.size);
+            os_file_append(output_path, text.str, text.size);
           }
         } break;
 

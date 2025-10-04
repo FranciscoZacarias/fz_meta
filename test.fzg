@@ -1,4 +1,7 @@
 
+@output_file_name `test`
+@output_directory `../src/generated/`
+
 @table
 UI_Stacks (name_upper, name_lower, type, default_value)
 {
@@ -37,6 +40,6 @@ UI_Stacks (name_upper, name_lower, type, default_value)
   @inline `  /* macro terminator */\n\n`
 
   @inline `#define UI_Context_Member_Stacks_Debug_Top_At_Zero \\n`
-  @foreach(UI_Stacks) `  if(ui_context.$(name_lower)_stack.top_index != 0) emit_fatal(Sf(ui_context.arena, "UI: Stack "S_FMT" not at 0. Actual value: '%u'", S_ARG(S("$(name_lower)_stack")), ui_context.$(name_lower)_stack.top_index); \\n`
+  @foreach(UI_Stacks) `  if(ui_context.$(name_lower)_stack.top_index != 0) emit_fatal(Sf(ui_context.arena, "UI: Stack "S_FMT" not at 0. Actual value: '%u'", S_ARG(S("$(name_lower)_stack")), ui_context.$(name_lower)_stack.top_index)); \\n`
   @inline `  /* macro terminator */\n\n`
 }
